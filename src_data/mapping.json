@@ -1,11 +1,11 @@
 {
   "table_mapping": {
-    "source_table": "netflix_dataset_150.csv",
-    "destination_table": "cleaned_netflix_dataset.csv",
+    "source_table": "netflix.csv",
+    "destination_table": "cleaned_netflix.csv",
     "description": "Netflix movies and TV shows data mapping"
   },
   "column_mappings": {
-    "show_id": "show_id",
+    "show_id": "shows_id",
     "type": "content_type",
     "title": "title_name",
     "director": "director_name",
@@ -17,16 +17,16 @@
     "duration": "content_duration"
   },
   "validation_rules": {
-    "primary_key": "show_id",
+    "primary_key": "shows_id",
     "required_columns": [
-      "show_id",
+      "shows_id",
       "content_type",
       "title_name",
       "country_origin",
       "year_released"
     ],
     "data_types": {
-      "show_id": "string",
+      "shows_id": "string",
       "content_type": "string",
       "title_name": "string",
       "director_name": "string",
