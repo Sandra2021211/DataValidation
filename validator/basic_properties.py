@@ -1,13 +1,16 @@
 import pandas as pd
 import json 
 
+#Reading csv file
 def read_csv(path):
     return pd.read_csv(path)
 
+#Reading json file
 def read_json(path):
     with open(path) as f:
         return json.load(f)
 
+#Comparing row counts between source and desination
 def compare_row_count(src_df,dest_df):
     a=len(src_df)
     b=len(dest_df)
@@ -18,6 +21,7 @@ def compare_row_count(src_df,dest_df):
     else:
         print("Row counts do not match")
 
+#Validate data types consistency after mapping
 def validate_data_types(src_df,dest_df,col_mappings):
     mismatch=[]
     for src,dest in col_mappings.items():
@@ -36,6 +40,7 @@ def validate_data_types(src_df,dest_df,col_mappings):
     else:
         print("Data types match after mapping")
 
+#Check for duplicate records in both datasets
 def check_duplicate(df,label):
     print(f"\nDuplicate check-{label}:")
     if df.duplicated().any():
@@ -44,6 +49,7 @@ def check_duplicate(df,label):
     else:
         print(f"No duplicates found in {label}")
 
+#Identify completely empty rows
 def check_emptyrows(df,label):
     print(f"\nCheck empty rows in {label}:")
     empty_rows=df[df.isnull().all(axis=1)]
