@@ -53,6 +53,6 @@ if __name__ == "__main__":
     with open("/workspaces/DataValidation/data/src_data/insurance_mapping.json") as f:
         mapping_data = json.load(f)
  
-    src_df = pd.read_csv("/workspaces/DataValidation/data/src_data/insurance_Claim_.csv")
-    dst_df = pd.read_csv("/workspaces/DataValidation/data/src_data/cleaned_insurance_claim_.csv")
+    src_df = pd.read_csv("/workspaces/DataValidation/data/src_data/cleaned_source.csv")
+    dst_df = pd.read_csv("/workspaces/DataValidation/data/src_data/cleaned_destination.csv")
     compare_rows_by_claim_id(src_df, dst_df, mapping_data)
