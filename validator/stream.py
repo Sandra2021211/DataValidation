@@ -96,8 +96,8 @@ class RowByRowComparator:
 
 def main():
     # File paths
-    test_src = "src_data/source_with_stream_time.csv"
-    test_dest = "src_data/dest_with_stream_time.csv"
+    test_src = "src_data/src_with_stream_time.csv"
+    test_dest = "src_data/destination_with_stream_time.csv"
     map_path = "src_data/mapping.json"
     yaml_path = "src_data/requirements.yaml"
 
@@ -112,11 +112,11 @@ def main():
     src_primary_key = "CLM_ID"
     dest_primary_key = "claim_id"
 
-    print("Source datatypes:",test_src_df.dtypes)
-    print("Destination datatypes:",test_dest_df.dtypes)
+    #print("Source datatypes:",test_src_df.dtypes)
+    #print("Destination datatypes:",test_dest_df.dtypes)
 
-    print("🔹 Sample Destination Row:", test_dest_df.iloc[0])
-    print("🔹 Sample Source Row:", test_src_df.iloc[0])
+    #print("Sample Destination Row:", test_dest_df.iloc[0])
+    #print("Sample Source Row:", test_src_df.iloc[0])
 
     # Get corrupted date window
     stream = StreamingData(test_src_df, test_dest_df)
@@ -125,11 +125,11 @@ def main():
 
     src_window, dest_window = stream.corrupted_dateframe(start_date, end_date)
 
-    print("🔸 Rows in filtered source:", len(src_window))
-    print("🔸 Rows in filtered destination:", len(dest_window))
+    #print("Rows in filtered source:", len(src_window))
+    #print("Rows in filtered destination:", len(dest_window))
 
-    print("🔍 Destination filtered preview:\n", dest_window[[dest_primary_key, 'stream_time']])
-    print("🔍 Source filtered preview:\n", src_window[[src_primary_key, 'stream_time']])
+    #print("Destination filtered preview:\n", dest_window[[dest_primary_key, 'stream_time']])
+    #print("Source filtered preview:\n", src_window[[src_primary_key, 'stream_time']])
 
 
 
@@ -146,7 +146,7 @@ def main():
     else:
         c_map = col_mappings
 
-    print("🗂 Column mappings used for comparison:\n", c_map)
+    print("Column mappings used for comparison:\n", c_map)
 
 
     # Perform comparison
