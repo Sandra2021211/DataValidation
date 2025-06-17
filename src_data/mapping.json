@@ -40,7 +40,8 @@
     "ICD9_PRCDR_CD_3": "procedure_code_secondary_2",
     "ICD9_PRCDR_CD_4": "procedure_code_secondary_3",
     "ICD9_PRCDR_CD_5": "procedure_code_secondary_4",
-    "ICD9_PRCDR_CD_6": "procedure_code_secondary_5"
+    "ICD9_PRCDR_CD_6": "procedure_code_secondary_5",
+    "stream_time": "stream_time"
   },
   "validation_rules": {
     "primary_key": "claim_id",
@@ -89,7 +90,8 @@
       "procedure_code_secondary_2": "string",
       "procedure_code_secondary_3": "string",
       "procedure_code_secondary_4": "string",
-      "procedure_code_secondary_5": "string"
+      "procedure_code_secondary_5": "string",
+      "stream_time": "date"
     },
     "date_format": "YYYYMMDD",
     "sample_size": 5,

@@ -2,6 +2,24 @@ import pandas as pd
 import yaml
 import json
 
+class FileReader:
+    @staticmethod
+    def read_csv(path,**kwargs):
+        #Reads a CSV file and returns a DataFrame.
+        return pd.read_csv(path,**kwargs)
+
+    @staticmethod
+    def read_json(path):
+        #Reads a JSON file and returns a dictionary.
+        with open(path, 'r') as f:
+            return json.load(f)
+
+    @staticmethod
+    def read_yaml(path):
+        with open(path,'r') as f:
+            return yaml.safe_load(f)
+
+
 class StreamingData:
     def __init__(self, src_df, dest_df):
         self.src_df = src_df
@@ -14,8 +32,16 @@ class StreamingData:
         #self.src_df['stream_time'] = pd.to_datetime(self.src_df['stream_time'])
         #self.dest_df['stream_time'] = pd.to_datetime(self.dest_df['stream_time'])
 
+        print("✅ Source stream_time range:", self.src_df['stream_time'].min(), "to", self.src_df['stream_time'].max())
+        print("✅ Dest stream_time range:", self.dest_df['stream_time'].min(), "to", self.dest_df['stream_time'].max())
+
+
         src_window = self.src_df[(self.src_df['stream_time'] >= c_start) & (self.src_df['stream_time'] <= c_end)]
         dest_window = self.dest_df[(self.dest_df['stream_time'] >= c_start) & (self.dest_df['stream_time'] <= c_end)]
+
+        print("🔸 Source window size:", len(src_window))
+        print("🔸 Destination window size:", len(dest_window))
+
 
         return src_window, dest_window
 
@@ -48,6 +74,9 @@ class RowByRowComparator:
                     src_val = src_row[src_col]
                     dest_val = dest_row[dest_col]
 
+                    #print(f"Comparing Row {k} | Source: {src_col}={src_val} | Destination: {dest_col}={dest_val}")
+
+
                     if pd.isnull(src_val) and pd.isnull(dest_val):
                         continue
 
@@ -67,24 +96,24 @@ class RowByRowComparator:
 
 def main():
     # File paths
-    test_src = "src_data/s.csv"
-    test_dest = "src_data/d.csv"
-    map_path = "src_data/map.json"
-    yaml_path = "src_data/requirement.yaml"
+    test_src = "src_data/source_with_stream_time.csv"
+    test_dest = "src_data/dest_with_stream_time.csv"
+    map_path = "src_data/mapping.json"
+    yaml_path = "src_data/requirements.yaml"
 
     # Load files
-    test_src_df = pd.read_csv(test_src)
-    test_dest_df = pd.read_csv(test_dest)
+    test_src_df = FileReader.read_csv(test_src,parse_dates=['stream_time'])
+    test_dest_df = FileReader.read_csv(test_dest,parse_dates=['stream_time'])
+    mapping=FileReader.read_json(map_path)
+    config = FileReader.read_yaml(yaml_path)
 
-    with open(map_path, 'r') as fi:
-        mapping = json.load(fi)
-
-    with open(yaml_path, 'r') as f:
-        config = yaml.safe_load(f)
 
     col_mappings = mapping["column_mappings"]
     src_primary_key = "CLM_ID"
     dest_primary_key = "claim_id"
+
+    print("Source datatypes:",test_src_df.dtypes)
+    print("Destination datatypes:",test_dest_df.dtypes)
 
     print("🔹 Sample Destination Row:", test_dest_df.iloc[0])
     print("🔹 Sample Source Row:", test_src_df.iloc[0])
@@ -96,6 +125,14 @@ def main():
 
     src_window, dest_window = stream.corrupted_dateframe(start_date, end_date)
 
+    print("🔸 Rows in filtered source:", len(src_window))
+    print("🔸 Rows in filtered destination:", len(dest_window))
+
+    print("🔍 Destination filtered preview:\n", dest_window[[dest_primary_key, 'stream_time']])
+    print("🔍 Source filtered preview:\n", src_window[[src_primary_key, 'stream_time']])
+
+
+
     src_window = src_window.drop_duplicates(subset=src_primary_key, keep='first')
     dest_window = dest_window.drop_duplicates(subset=dest_primary_key, keep='first')
 
@@ -105,9 +142,12 @@ def main():
     mode = config["validation_config"]["column_comparison"]["mode"]
     if mode == "specific":
         selected_cols = config["validation_config"]["column_comparison"]["columns"]
-        c_map = {k: v for k, v in col_mappings.items() if k in selected_cols}
+        c_map = {k: v for k, v in col_mappings.items() if v in selected_cols}
     else:
         c_map = col_mappings
+
+    print("🗂 Column mappings used for comparison:\n", c_map)
+
 
     # Perform comparison
     window_comparator = RowByRowComparator(src_window, dest_window, c_map, src_primary_key, dest_primary_key)
