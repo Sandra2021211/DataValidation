@@ -4,7 +4,7 @@ from custom_validator import CustomDatasetValidator
 def main():
     print("\nChoose Validation Mode:")
     print("1. Full Dataset Validation")
-    print("2. Custom Dataset Window (Corrupted Range) Validation")
+    print("2. Custom Dataset Validation")
 
     choice = input("Enter 1 or 2: ").strip()
 
