@@ -1,0 +1,8 @@
+validation_config:
+  date_filter:
+    start_date: "2025-04-01"
+    end_date: "2025-04-07"
+
+  column_comparison:
+    mode: "specific"  # or "all"
+    columns: ["provider_number", "claim_payment_amount"] 
