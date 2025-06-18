@@ -1,17 +1,23 @@
 import pandas as pd
 import json
+import yaml
 
 class FileReader:
     @staticmethod
-    def read_csv(path):
+    def read_csv(path, **kwargs):
         #Reads a CSV file and returns a DataFrame.
-        return pd.read_csv(path)
+        return pd.read_csv(path, **kwargs)
 
     @staticmethod
     def read_json(path):
         #Reads a JSON file and returns a dictionary.
         with open(path, 'r') as f:
             return json.load(f)
+
+    @staticmethod
+    def read_yaml(path):
+        with open(path,'r') as f:
+            return yaml.safe_load(f)
 
 class ColumnValidator:
     @staticmethod
