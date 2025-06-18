@@ -1,25 +1,26 @@
 import pandas as pd
+import itertools
 
-df = pd.read_csv("/workspaces/DataValidation/Data/src_data/cleaned_insurance_claim_.csv")  # Replace with your actual path
-
-df_copy = df.copy()
+df = pd.read_csv("/workspaces/DataValidation/Data/src_data/insurance_claim.csv")
 
 # Drop fully identical rows
-df_copy = df_copy.drop_duplicates()
+df = df.drop_duplicates()
 
-#  try claim_id -> only
-unique_claim_ids = df_copy['claim_id'].nunique()
+# Function to find the smallest combination of columns that forms a unique key 
+def find_min_unique_key(df):
+    cols = df.columns.tolist()
+    for r in range(1, len(cols) + 1):
+        for combo in itertools.combinations(cols, r):
+            if df.duplicated(subset=combo).sum() == 0:
+                return combo
+    return None
 
-# try claim_id + patient_id 
-df_copy['claim_patient'] = df_copy['claim_id'].astype(str) + '_' + df_copy['patient_id'].astype(str)
-unique_claim_patient = df_copy['claim_patient'].nunique()
+# Find unique key columns
+unique_key_columns = find_min_unique_key(df)
 
-# try claim_id + patient_id + claim_segment
-df_copy['claim_patient_segment'] = df_copy['claim_patient'] + '_' + df_copy['claim_segment'].astype(str)
-unique_composite_keys = df_copy['claim_patient_segment'].nunique()
-
-# Final counts
-print("\n Unique Key Counts:")
-print(f" Unique 'claim_id' count: {unique_claim_ids}")
-print(f" Unique 'claim_id + patient_id' count: {unique_claim_patient}")
-print(f" Unique 'claim_id + patient_id + claim_segment' count: {unique_composite_keys}")
+# Display results
+if unique_key_columns:
+    print("Smallest unique key combination found:")
+    print(f"Columns used: {unique_key_columns}\n")
+else:
+    print(" No unique key combination found.")
