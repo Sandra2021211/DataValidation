@@ -1,62 +1,68 @@
-import pandas as pd 
+import pandas as pd
 import time
+from multiprocessing import Pool, cpu_count
+
+def compare_row_multiprocess(args):
+    k, source_dict, dest_dict, col_mappings = args
+    mismatch = []
+
+    src_row = source_dict.get(k)
+    dest_row = dest_dict.get(k)
+
+    if dest_row is None:
+        mismatch.append((k, "row", "missing in destination"))
+        return mismatch
+
+    for src_col, dest_col in col_mappings.items():
+        src_val = src_row.get(src_col)
+        dest_val = dest_row.get(dest_col)
+
+        if pd.isnull(src_val) and pd.isnull(dest_val):
+            continue
+
+        if src_val != dest_val:
+            mismatch.append((k, src_col, dest_col, src_val, dest_val))
+    return mismatch
+
 
 class RowByRowComparator:
-    def __init__(self,source_df,dest_df,col_mappings,src_primary_key,dest_primary_key):
-        self.source_df=source_df.copy()
-        self.dest_df=dest_df.copy()
-        self.col_mappings=col_mappings
-        self.src_primary_key=src_primary_key
-        self.dest_primary_key=dest_primary_key
+    def __init__(self, source_df, dest_df, col_mappings, src_primary_key, dest_primary_key):
+        self.source_df = source_df.copy()
+        self.dest_df = dest_df.copy()
+        self.col_mappings = col_mappings
+        self.src_primary_key = src_primary_key
+        self.dest_primary_key = dest_primary_key
 
-        #print("Source columns:", self.source_df.columns.tolist())
-        #print("Destination columns:", self.dest_df.columns.tolist())
+        # Set index for fast access
+        self.source_df.set_index(src_primary_key, inplace=True)
+        self.dest_df.set_index(dest_primary_key, inplace=True)
 
-
-        #Set index for fast row access using primary key
-        self.source_df.set_index(src_primary_key,inplace=True)
-        self.dest_df.set_index(dest_primary_key,inplace=True)
+        self.source_dict = self.source_df.to_dict(orient="index")
+        self.dest_dict = self.dest_df.to_dict(orient="index")
 
     def compare(self):
         print("\nRow by Row comparison:")
-        start_time=time.time() #Start time
+        start_time = time.time()
 
-        mismatch=[]
+        keys = list(self.source_dict.keys())
 
-        #Iterate through each row in source df
-        for k in self.source_df.index:
-            if k not in self.dest_df.index:
-                mismatch.append((k,"row","missing in destination"))
-                continue
+        # Prepare data to be passed to multiprocessing pool
+        input_data = [(k, self.source_dict, self.dest_dict, self.col_mappings) for k in keys]
 
-            src_row=self.source_df.loc[k]
-            dest_row=self.dest_df.loc[k]
+        with Pool(processes=cpu_count()) as pool:
+            results = pool.map(compare_row_multiprocess, input_data)
 
-            for src_col,dest_col in self.col_mappings.items():
-                if src_col in src_row and dest_col in dest_row:
-                    src_val=src_row[src_col]
-                    dest_val=dest_row[dest_col]
-                    
-                    #if values are NULL, then continue
+        all_mismatch = [m for sublist in results for m in sublist if sublist]
 
-                    if pd.isnull(src_val) and pd.isnull(dest_val):
-                        continue
-
-                    #Compare values and appends mismatch to the list
-
-                    elif src_val!=dest_val:
-                        mismatch.append((k,src_col,dest_col,src_val,dest_val))
-
-        if mismatch:
+        if all_mismatch:
             print("Mismatches found:")
-            for mis in mismatch:
-                if len(mismatch)==3:
+            for mis in all_mismatch:
+                if len(mis) == 3:
                     print(f"Row {mis[0]}: {mis[2]}")
                 else:
                     print(f"Row {mis[0]} | Source: {mis[1]}-{mis[3]} , Destination: {mis[2]}-{mis[4]}")
         else:
             print("All rows match!!!")
 
-        end_time=time.time() #End time
-        time_diff=end_time-start_time
-        print(f"Time taken for row-by-row comparison: {time_diff:.2f} seconds")
+        end_time = time.time()
+        print(f"Time taken for row-by-row comparison: {end_time - start_time:.2f} seconds")

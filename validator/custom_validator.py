@@ -1,7 +1,6 @@
 import pandas as pd 
 from file_read import FileReader
-from stream import StreamingData
-from row_by_row_comparison import RowByRowComparator
+from row_by_row_comparison import RowByRowComparator 
 
 class CustomDatasetValidator:
     def __init__(self, src_path, dest_path, map_path, yaml_path):
@@ -9,6 +8,26 @@ class CustomDatasetValidator:
         self.dest_path = dest_path
         self.map_path = map_path
         self.yaml_path = yaml_path
+
+    def corrupted_dateframe(self,src_df,dest_df,start,end):
+        c_start = pd.to_datetime(start)
+        c_end = pd.to_datetime(end)
+
+        #self.src_df['stream_time'] = pd.to_datetime(self.src_df['stream_time'])
+        #self.dest_df['stream_time'] = pd.to_datetime(self.dest_df['stream_time'])
+
+        #print("Source stream_time range:", self.src_df['stream_time'].min(), "to", self.src_df['stream_time'].max())
+        #print("Dest stream_time range:", self.dest_df['stream_time'].min(), "to", self.dest_df['stream_time'].max())
+
+
+        src_window = src_df[(src_df['stream_time'] >= c_start) & (src_df['stream_time'] <= c_end)]
+        dest_window = dest_df[(dest_df['stream_time'] >= c_start) & (dest_df['stream_time'] <= c_end)]
+
+        #print("Source window size:", len(src_window))
+        #print("Destination window size:", len(dest_window))
+
+
+        return src_window, dest_window
 
     def run(self):
 
@@ -29,12 +48,10 @@ class CustomDatasetValidator:
         #print("Sample Source Row:", test_src_df.iloc[0])
 
         # Get corrupted date window
-
-        stream = StreamingData(test_src_df, test_dest_df)
         start_date = config["validation_config"]["date_filter"]["start_date"]
         end_date = config["validation_config"]["date_filter"]["end_date"]
 
-        src_window, dest_window = stream.corrupted_dateframe(start_date, end_date)
+        src_window, dest_window = self.corrupted_dateframe(test_src_df,test_dest_df,start_date, end_date)
 
         #print("Rows in filtered source:", len(src_window))
         #print("Rows in filtered destination:", len(dest_window))
@@ -59,4 +76,4 @@ class CustomDatasetValidator:
 
         # Perform comparison
         window_comparator = RowByRowComparator(src_window, dest_window, c_map, src_primary_key, dest_primary_key)
-        window_comparator.compare()
+        window_comparator.compare() 
