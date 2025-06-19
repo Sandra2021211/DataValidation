@@ -5,4 +5,4 @@ validation_config:
 
   column_comparison:
     mode: "specific"  # or "all"
-    columns: ["provider_number", "claim_payment_amount"] 
+    columns: ["provider_number", "claim_payment_amount"]  
