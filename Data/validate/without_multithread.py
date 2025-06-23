@@ -2,48 +2,6 @@ import pandas as pd
 import json
 import itertools
 import time
-import numpy as np
-from multiprocessing import Pool, cpu_count
-
-
-def compare_row_chunk(args):
-    dest_chunk, source_indexed, mapping_data = args
-    mismatches = []
-
-    for i, dest_row in dest_chunk.iterrows():
-        key = dest_row["composite_key"]
-        if key not in source_indexed.index:
-            mismatches.append(f" Composite key '{key}' not found in source.")
-            continue
-
-        source_row = source_indexed.loc[key]
-        if isinstance(source_row, pd.DataFrame):
-            source_row = source_row.iloc[0]
-
-        for src_col, dest_col in mapping_data.items():
-            if src_col in source_row and dest_col in dest_row:
-                src_val = source_row[src_col]
-                dest_val = dest_row[dest_col]
-
-                if pd.isna(src_val) and pd.isna(dest_val):
-                    continue
-                elif pd.isna(src_val) != pd.isna(dest_val):
-                    mismatches.append(
-                        f"[{key}] NULL_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'"
-                    )
-                else:
-                    try:
-                        if float(src_val) != float(dest_val):
-                            mismatches.append(
-                                f"[{key}] VALUE_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'"
-                            )
-                    except:
-                        if str(src_val).strip() != str(dest_val).strip():
-                            mismatches.append(
-                                f"[{key}] VALUE_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'"
-                            )
-    return mismatches
-
 
 class FullValidator:
     def __init__(self, source_path, dest_path, mapping_path):
@@ -78,20 +36,23 @@ class FullValidator:
         self.dest_df = self.read_csv(self.dest_path)
         self.mapping_data = self.read_mapping(self.mapping_path)
 
+# check empty rows
     def check_empty_rows(self, df, file_name):
         empty_rows = df[df.isnull().all(axis=1)]
         count = len(empty_rows)
         print(f"\n Checking completely empty rows in {file_name} dataset:")
-        print(f" Found {count} empty rows.")
+        print(f" if count == 0 Found {count} empty rows.")
         return count
 
+# check duplicate rows
     def check_duplicates(self, df, file_name):
         duplicates = df[df.duplicated()]
         count = len(duplicates)
         print(f"\n Checking duplicate rows in {file_name} dataset:")
-        print(f" Found {count} duplicate records.")
+        print(f" count == 0  Found {count} duplicate records.")
         return count
 
+# validate data types
     def validate_data_types(self):
         mismatch = []
         for src, dest in self.mapping_data.items():
@@ -108,6 +69,7 @@ class FullValidator:
         else:
             print(" All column data types match.")
 
+# compare row and column counts
     def compare_row_and_column_counts(self):
         source_rows, source_cols = self.source_df.shape
         dest_rows, dest_cols = self.dest_df.shape
@@ -118,6 +80,7 @@ class FullValidator:
         print(f" Row count {'matches' if source_rows == dest_rows else 'does not match'}")
         print(f" Column count {'matches' if source_cols == dest_cols else 'does not match'}")
 
+# validate column mappings
     def validate_column_mappings(self):
         column_mappings = self.mapping_data
         source_columns = set(self.source_df.columns)
@@ -148,10 +111,10 @@ class FullValidator:
                     return
         self.unique_key_columns = []
 
+# compare rows based on unique keys
     def compare_rows(self):
         self.find_min_unique_key()
         start_time = time.time()
-
         if not self.unique_key_columns:
             print("\n No unique key combination found.")
             return
@@ -175,25 +138,40 @@ class FullValidator:
         ].astype(str).agg("_".join, axis=1)
 
         source_indexed = self.source_df.set_index("composite_key")
+        mismatches = []
 
-        # Split dest_df into chunks for multiprocessing
-        num_processes = min(cpu_count(), 4)  # Limit to 4 or available cores
-        chunks = np.array_split(self.dest_df, num_processes)
+        for i, dest_row in self.dest_df.iterrows():
+            key = dest_row["composite_key"]
+            if key not in source_indexed.index:
+                mismatches.append(f" Composite key '{key}' not found in source.")
+                continue
 
-        # Prepare arguments
-        args = [(chunk, source_indexed, self.mapping_data) for chunk in chunks]
+            source_row = source_indexed.loc[key]
+            if isinstance(source_row, pd.DataFrame):
+                source_row = source_row.iloc[0]
 
-        with Pool(processes=num_processes) as pool:
-            results = pool.map(compare_row_chunk, args)
+            for src_col, dest_col in self.mapping_data.items():
+                if src_col in source_row and dest_col in dest_row:
+                    src_val = source_row[src_col]
+                    dest_val = dest_row[dest_col]
 
-        # Flatten results
-        mismatches = [line for sublist in results for line in sublist]
+                    if pd.isna(src_val) and pd.isna(dest_val):
+                        continue
+                    elif pd.isna(src_val) != pd.isna(dest_val):
+                        mismatches.append(f"[{key}] NULL_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'")
+                    else:
+                        try:
+                            if float(src_val) != float(dest_val):
+                                mismatches.append(f"[{key}] VALUE_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'")
+                        except:
+                            if str(src_val).strip() != str(dest_val).strip():
+                                mismatches.append(f"[{key}] VALUE_MISMATCH: {src_col} → {dest_col}: source='{src_val}' dest='{dest_val}'")
 
         with open("row_mismatches.txt", "w") as f:
             for line in mismatches:
                 f.write(line + "\n")
-
-        end_time = time.time()
+        
+        end_time = time.time()  # End timer
         elapsed_time = end_time - start_time
 
         print(f"\n Row comparison complete. Mismatches found: {len(mismatches)}")

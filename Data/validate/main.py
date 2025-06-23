@@ -1,16 +1,17 @@
 import os
 from dotenv import load_dotenv
-from fullValidation import FullValidator
+#from fullValidation import FullValidator
 from customValidation import CustomDatasetValidator
+from without_multithread import FullValidator
 
 def main():
     load_dotenv()
 
-    source_path = os.getenv("source_file")
+    source_path = os.getenv("source_file")  
     dest_path = os.getenv("dest_file")
-    mapping_path = os.getenv("mapping_file")
+    mapping_path = os.getenv("mapping_file")  
 
-    print("\nValidation Options:")
+    print("\nValidation Options:")  
     print("1. Full Validation")
     print("2. Custom Validation (Choose specific checks)\n")
 
