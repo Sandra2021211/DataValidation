@@ -67,8 +67,9 @@ class WithoutColumnMapping:
                 src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
                 dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
 
+                # Row wise comparison
                 match=src_series==dest_series
-                
+
                 match_percent=sum(match)/len(self.src_df)
                 if match_percent>=self.threshold and src_col not in self.mapping:
                     self.mapping[src_col]=dest_col
@@ -81,19 +82,23 @@ class WithoutColumnMapping:
         self.src_df=FileReader.read_csv(self.src_path)
         self.dest_df=FileReader.read_csv(self.dest_path)
 
+        # Drop duplicate records based on the primary key column
         self.src_df = self.src_df.drop_duplicates(subset=self.src_primary_key, keep='first')
         self.dest_df = self.dest_df.drop_duplicates(subset=self.dest_primary_key, keep='first')
 
         print("\nSource PK unique:", self.src_df[self.src_primary_key].is_unique)
         print("Destination PK unique:", self.dest_df[self.dest_primary_key].is_unique)
 
+        # Step 1: Align by common primary keys
         self.common_keys()
 
+        # Step 2: Try matching columns by their position
         self.match_by_position()
-        
+
+        # Step 3: Fallback - Try matching remaining columns by value similarity        
         self.match_by_value()
 
-
+        # Final mapping result
         print("\nInferred column mappings:")
         for src,dest in self.mapping.items():
             print(f"{src} - {dest}")
