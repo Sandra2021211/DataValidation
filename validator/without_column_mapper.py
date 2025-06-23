@@ -5,17 +5,21 @@ class WithoutColumnMapping:
     def __init__(self,src_path,dest_path,src_primary_key,dest_primary_key,threshold=0.8):
         self.src_path=src_path
         self.dest_path=dest_path
-        self.threshold=threshold
+        self.threshold=threshold # matching threshold- 80%
         self.src_primary_key=src_primary_key
         self.dest_primary_key=dest_primary_key
-        self.mapping={}
+        self.mapping={} # Holds the final matched column pairs
 
     def common_keys(self):
+        # identify common primary key values in both datasets
         common=set(self.src_df[self.src_primary_key]) & set (self.dest_df[self.dest_primary_key])
         #print(f"Found {len(common)} common keys")
+
+        # Filter rows to keep only matching primary keys
         self.src_df=self.src_df[self.src_df[self.src_primary_key].isin(common)]
         self.dest_df=self.dest_df[self.dest_df[self.dest_primary_key].isin(common)]
 
+        # setting primary key as the index
         self.src_df.set_index(self.src_primary_key,inplace=True)
         self.dest_df.set_index(self.dest_primary_key,inplace=True)
 
@@ -26,33 +30,51 @@ class WithoutColumnMapping:
             print("Column counts mismatch")
             return False 
 
+        # Get column names in order as lists
         src_cols=self.src_df.columns.tolist()
         dest_cols=self.dest_df.columns.tolist()
 
         print("\nComparing columns by position: ")
 
         for src_col,dest_col in zip(src_cols,dest_cols):
-            match=self.src_df[src_col]==self.dest_df[dest_col]
+            # Clean and normalize both columns (fill missing values, convert to string, strip spaces)
+            src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
+            dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+
+            #match=self.src_df[src_col]==self.dest_df[dest_col]
+            # Perform row wise comparison
+            match= src_series==dest_series
+
+            # Calculate match percentage
             match_percent=sum(match)/len(self.src_df)
+
             if match_percent>=self.threshold:
-                self.mapping[src_col]=dest_col 
+                self.mapping[src_col]=dest_col  # Store matched pair
+                print(f"Matched by position: {src_col} -> {dest_col} (match: {match_percent:.2f})")
             else:
                 print(f"{src_col} vs {dest_col}: match={match_percent:.2f}-below threshold")
 
     def match_by_value(self):
+         # Compare every unmatched source column to every unmatched destination column
         for src_col in self.src_df.columns:
             if src_col in self.mapping:
                 continue 
                 
             for dest_col in self.dest_df.columns:
                 if dest_col in self.mapping.values():
-                    continue
+                    continue 
 
-                match=self.src_df[src_col]==self.dest_df[dest_col]
+                src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
+                dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+
+                match=src_series==dest_series
+                
                 match_percent=sum(match)/len(self.src_df)
                 if match_percent>=self.threshold and src_col not in self.mapping:
                     self.mapping[src_col]=dest_col
                     print(f"Matched by value: {src_col} -> {dest_col} (match: {match_percent:.2f})")
+                #else:
+                    #print(f"{src_col} vs {dest_col}: match={match_percent:.2f}-below threshold")
 
 
     def run(self):
