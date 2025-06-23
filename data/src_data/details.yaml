@@ -4,5 +4,5 @@ validation_config:
     end_date: "2025-04-07"
 
   column_comparison:
-    mode: "specific"  # or "all"
+    mode: "specific" 
     columns: ["provider_number", "claim_payment_amount"]  

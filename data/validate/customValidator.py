@@ -116,13 +116,3 @@ class CustomDatasetValidator:
 
         window_comparator = RowByRowComparator(src_window, dest_window, c_map, src_primary_key, dest_primary_key)
         window_comparator.compare()
-
-
-if __name__ == "__main__":
-    validator = CustomDatasetValidator(
-        src_path="/workspaces/DataValidation/data/src_data/expanded_source.csv",
-        dest_path="/workspaces/DataValidation/data/src_data/expanded_destination.csv",
-        map_path="/workspaces/DataValidation/data/src_data/insurance_mapping.json",
-        yaml_path="/workspaces/DataValidation/data/src_data/details.yaml"
-    )
-    validator.run()
