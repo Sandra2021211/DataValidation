@@ -37,13 +37,25 @@ class WithoutColumnMapping:
         print("\nComparing columns by position: ")
 
         for src_col,dest_col in zip(src_cols,dest_cols):
-            # Clean and normalize both columns (fill missing values, convert to string, strip spaces)
-            src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
-            dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
 
-            #match=self.src_df[src_col]==self.dest_df[dest_col]
-            # Perform row wise comparison
-            match= src_series==dest_series
+            try:
+                # for numeric mismatches
+                src_series=pd.to_numeric(self.src_df[src_col],errors='coerce')
+                dest_series=pd.to_numeric(self.dest_df[dest_col],errors='coerce')
+
+                if src_series.notna().sum()>0 and dest_series.notna().sum()>0:
+                    match=(src_series.fillna(0).astype(int)==dest_series.fillna(0).astype(int)) # replaces NaN with 0 and converts the float to int
+                else:
+                    raise ValueError
+
+            except:
+                # Clean and normalize both columns (fill missing values, convert to string, strip spaces)
+                src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
+                dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+
+                #match=self.src_df[src_col]==self.dest_df[dest_col]
+                # Perform row wise comparison
+                match= src_series==dest_series
 
             # Calculate match percentage
             match_percent=sum(match)/len(self.src_df)
@@ -62,13 +74,25 @@ class WithoutColumnMapping:
                 
             for dest_col in self.dest_df.columns:
                 if dest_col in self.mapping.values():
-                    continue 
+                    continue
 
-                src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
-                dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+                try:
+                    # for numeric mismatches
+                    src_series=pd.to_numeric(self.src_df[src_col],errors='coerce')
+                    dest_series=pd.to_numeric(self.dest_df[dest_col],errors='coerce')
 
-                # Row wise comparison
-                match=src_series==dest_series
+                    if src_series.notna().sum()>0 and dest_series.notna().sum()>0:
+                        #match=(abs(src_series-dest_series)<0.01)
+                        match=(src_series.fillna(0).astype(int)==dest_series.fillna(0).astype(int)) # replaces NaN with 0 and converts the float to int
+                    else:
+                        raise ValueError
+
+                except:
+                    src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
+                    dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+
+                    # Row wise comparison
+                    match=src_series==dest_series
 
                 match_percent=sum(match)/len(self.src_df)
                 if match_percent>=self.threshold and src_col not in self.mapping:

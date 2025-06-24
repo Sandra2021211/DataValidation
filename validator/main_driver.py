@@ -34,8 +34,8 @@ def main():
 
         elif choice == "3":
             validator = WithoutColumnMapping(
-                src_path = "src_data/insurance_claims.csv",
-                dest_path = "src_data/cleaned_insurance_claims.csv",
+                src_path = "src_data/s.csv",
+                dest_path = "src_data/d.csv",
                 src_primary_key="CLM_ID",
                 dest_primary_key="claim_id"
             )
