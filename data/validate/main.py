@@ -1,8 +1,7 @@
-
 import json
 from fullValidator import DataValidator
 from customValidator import CustomDatasetValidator
-from column_matcher import ColumnMatcher  # Import the ColumnMatcher class
+from column_matcher import ColumnMatcher 
 
 def main():
     print("Choose an option:")
