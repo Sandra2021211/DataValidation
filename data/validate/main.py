@@ -1,7 +1,7 @@
 import json
 from fullValidator import DataValidator
 from customValidator import CustomDatasetValidator
-from column_matcher import ColumnMatcher 
+from column_matcher import ColumnMatcher
 
 def main():
     print("Choose an option:")
@@ -48,8 +48,9 @@ def main():
             matcher = ColumnMatcher(
                 source_path="/workspaces/DataValidation/data/src_data/SRC.csv",
                 destination_path="/workspaces/DataValidation/data/src_data/DST.csv",
-                source_key="Salary", 
-                destination_key="Annual_Salary"  
+                source_key="ID",  
+                destination_key="Emp_ID",  
+                match_threshold=0.8  
             )
             matcher.execute()
 
@@ -65,3 +66,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
