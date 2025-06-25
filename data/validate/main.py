@@ -1,15 +1,13 @@
-# main.py
-
 import json
 from fullValidator import DataValidator
 from customValidator import CustomDatasetValidator
-from column_matcher import ColumnMatcher  # Import the ColumnMatcher class
+from column_matcher import ColumnMatcher
 
 def main():
     print("Choose an option:")
     print("1. Full Validator")
     print("2. Custom Validator")
-    print("3. Column Matcher Without Predefined Mapping")  # New option added
+    print("3. Column Matcher Without Predefined Mapping") 
 
     choice = input("Enter your choice (1, 2, or 3): ")
 
@@ -50,8 +48,9 @@ def main():
             matcher = ColumnMatcher(
                 source_path="/workspaces/DataValidation/data/src_data/SRC.csv",
                 destination_path="/workspaces/DataValidation/data/src_data/DST.csv",
-                source_key="Salary",  # Replace with actual column name in the source file
-                destination_key="Annual_Salary"  # Replace with actual column name in the destination file
+                source_key="ID",  
+                destination_key="Emp_ID",  
+                match_threshold=0.8  
             )
             matcher.execute()
 
