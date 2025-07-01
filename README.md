@@ -129,3 +129,21 @@
         4. Output best-matching column pairs for improved mapping and validation.
 
 **Summary:** Enhanced the tool with precise row alignment and advanced column matching techniques. By combining positional and value-based comparisons, it now identifies highly reliable column pairs, streamlining validation and mapping tasks.
+
+**Day 11 – Ensuring High Match Accuracy**
+
+**Date:** 24-06-2025
+
+**Highlights:**
+
+       1. Built a script to compare source and destination datasets, focusing on missing details.
+    
+       2. Ensured a minimum 90% match threshold for validation accuracy.
+       
+       3. Achieved 100% match for integer values.
+
+       4. Implemented logic to handle decimals by converting them to integers (e.g., `57000.67` to `57000`) for seamless comparisons.
+
+**Summary:** The script effectively identifies missing data between datasets while maintaining high accuracy. By handling decimal-to-integer conversions, it ensures precise validation, delivering consistent and reliable results.
+
+
