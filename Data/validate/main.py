@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
-#from fullValidation import FullValidator
-from customValidation import CustomDatasetValidator
-from without_multithread import FullValidator
+from mapped_columns.customValidation import CustomDatasetValidator
+from mapped_columns.without_multithread import FullValidator
+from unmapped_columns.UnmappedColumnValidator import UnmappedColumnValidator
 
 def main():
     load_dotenv()
@@ -11,15 +11,15 @@ def main():
     dest_path = os.getenv("dest_file")
     mapping_path = os.getenv("mapping_file")  
 
-    print("\nValidation Options:")  
+    print("\nValidation Options:")
     print("1. Full Validation")
-    print("2. Custom Validation (Choose specific checks)\n")
+    print("2. Custom Validation")
+    print("3. Unmapped Column Validation\n")  
 
-    choice = input("Enter your choice (1 or 2): ").strip()
-
-    validator = FullValidator(source_path, dest_path, mapping_path)
+    choice = input("Enter your choice (1, 2 or 3): ").strip()
 
     if choice == "1":
+        validator = FullValidator(source_path, dest_path, mapping_path)
         validator.run_all_validations()
 
     elif choice == "2":
@@ -30,8 +30,16 @@ def main():
             yaml_path="/workspaces/DataValidation/Data/src_data/stream/requirements.yaml"
         )
         validator.run()
+
+    elif choice == "3":
+        validator = UnmappedColumnValidator(
+            src_path="/workspaces/DataValidation/Data/src_data/insurance_claim.csv",
+            dest_path="/workspaces/DataValidation/Data/src_data/cleaned_insurance_claim_.csv"
+        )
+        validator.run_validation()
+
     else:
-        print("Invalid choice. Please enter 1 or 2.")
+        print("Invalid choice. Please enter 1, 2, or 3.")
 
 if __name__ == "__main__":
-    main()  
+    main()

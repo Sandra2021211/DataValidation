@@ -1,0 +1,11 @@
+id,age,salary,bonus,department,name,location
+1,25,50000.75,5000.25,Engineering,John Doe,New York
+2,30,60000.50,5500.75,Marketing,Jane Smith,Chicago
+3,28,45000.00,4000.00,Sales,Emily Davis,Los Angeles
+4,35,75000.20,6500.60,Engineering,Michael Lee,Houston
+5,40,85000.80,7200.10,HR,Sarah Kim,Seattle
+6,26,47000.90,4100.30,Finance,David Clark,San Francisco
+7,32,66000.00,5300.00,Sales,Alice Brown,Boston
+8,29,48000.65,3900.95,Marketing,Chris Evans,Miami
+9,38,90000.10,8000.75,Engineering,Karen Wilson,Dallas
+10,27,52000.55,4500.25,HR,Tom Harris,Atlanta
