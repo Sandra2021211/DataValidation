@@ -3,6 +3,7 @@
 **Date:** 10-06-2025
 
 **Highlights:**
+
             1. Validated column mappings between source and destination files using mapping.json.
 
             2. Detected unmapped columns through set operations and logged discrepancies.
@@ -14,6 +15,7 @@
 **Date:** 11-06-2025
 
 **Highlights:**
+
             1. Checked for empty rows and duplicate entries.
 
             2. Validated data types for mapped columns.
@@ -27,6 +29,7 @@
 **Date:** 12-06-2025
 
 **Highlights:**
+
             1. Found a unique key by combining columns iteratively.
 
             2. Ensured row-level uniqueness for future validations.
