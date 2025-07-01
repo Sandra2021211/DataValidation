@@ -1,7 +1,7 @@
 import json
-from fullValidator import DataValidator
-from customValidator import CustomDatasetValidator
-from column_matcher import ColumnMatcher
+from mapped_validation.fullValidator import DataValidator
+from mapped_validation.customValidator import CustomDatasetValidator
+from mapped_validation.column_matcher import ColumnMatcher
 
 def main():
     print("Choose an option:")

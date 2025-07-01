@@ -1,5 +1,5 @@
 import pandas as pd
-from file_read import FileReader
+from .file_read import FileReader
 
 
 class ColumnMatcher:
