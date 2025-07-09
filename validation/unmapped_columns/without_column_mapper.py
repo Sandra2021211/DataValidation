@@ -1,5 +1,6 @@
 import pandas as pd
 from mapped_columns.file_read import FileReader
+from difflib import SequenceMatcher
 
 class WithoutColumnMapping:
     def __init__(self,src_path,dest_path,src_primary_key,dest_primary_key,threshold=0.8):
@@ -44,6 +45,7 @@ class WithoutColumnMapping:
                 dest_series=pd.to_numeric(self.dest_df[dest_col],errors='coerce')
 
                 if src_series.notna().sum()>0 and dest_series.notna().sum()>0:
+                    #match=(abs(src_series.fillna(0)-dest_series.fillna(0))<=1.0)
                     match=(src_series.fillna(0).astype(int)==dest_series.fillna(0).astype(int)) # replaces NaN with 0 and converts the float to int
                 else:
                     raise ValueError
@@ -67,7 +69,8 @@ class WithoutColumnMapping:
                 print(f"{src_col} vs {dest_col}: match={match_percent:.2f}-below threshold")
 
     def match_by_value(self):
-         # Compare every unmatched source column to every unmatched destination column
+        # Compare every unmatched source column to every unmatched destination column
+        print("\nComparing columns by value:")
         for src_col in self.src_df.columns:
             if src_col in self.mapping:
                 continue 
@@ -82,7 +85,7 @@ class WithoutColumnMapping:
                     dest_series=pd.to_numeric(self.dest_df[dest_col],errors='coerce')
 
                     if src_series.notna().sum()>0 and dest_series.notna().sum()>0:
-                        #match=(abs(src_series-dest_series)<0.01)
+                        #match=(abs(src_series.fillna(0)-dest_series.fillna(0))<=1.0)
                         match=(src_series.fillna(0).astype(int)==dest_series.fillna(0).astype(int)) # replaces NaN with 0 and converts the float to int
                     else:
                         raise ValueError
@@ -100,6 +103,36 @@ class WithoutColumnMapping:
                     print(f"Matched by value: {src_col} -> {dest_col} (match: {match_percent:.2f})")
                 #else:
                     #print(f"{src_col} vs {dest_col}: match={match_percent:.2f}-below threshold")
+
+    def match_by_word_similarity(self):
+        print("\nComparing columns by Word Similarity:")
+        for src_col in self.src_df.columns:
+            if src_col in self.mapping:
+                continue
+
+            for dest_col in self.dest_df.columns:
+                if dest_col in self.mapping:
+                    continue 
+
+                src_series=self.src_df[src_col].fillna('').astype(str).str.strip()
+                dest_series=self.dest_df[dest_col].fillna('').astype(str).str.strip()
+
+                match_count=0
+                total=len(src_series)
+
+                for src_val,dest_val in zip(src_series,dest_series):
+                    if pd.isna(src_val) or pd.isna(dest_val):
+                        continue 
+                    ratio=SequenceMatcher(None,str(src_val),str(dest_val)).ratio()
+                    if ratio>=0.8:
+                        match_count+=1
+
+                match_percent=match_count/total if total>0 else 0
+
+                if match_percent>self.threshold:
+                    self.mapping[src_col]=dest_col
+                    print(f"Matched by word similarity: {src_col} -> {dest_col} (match:{match_percent:.2f})")
+
 
 
     def run(self):
@@ -121,6 +154,10 @@ class WithoutColumnMapping:
 
         # Step 3: Fallback - Try matching remaining columns by value similarity        
         self.match_by_value()
+
+        self.match_by_word_similarity()
+
+        
 
         # Final mapping result
         print("\nInferred column mappings:")
