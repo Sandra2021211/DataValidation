@@ -1,11 +1,9 @@
-# Data Validation Pipeline
-
 ## Features
 
 * Supports **three validation modes**:
 
   1. **Full Dataset Validation**
-  2. **Custom Dataset (Corrupted Window) Validation**
+  2. **Custom (Corrupted Window) Validation**
   3. **Automated Column Mapping** (No `mapping.json` required)
 
 * Smart column matching using:
@@ -14,7 +12,7 @@
   * **Value equality matching**
   * **Fuzzy string similarity** (via `SequenceMatcher`)
 
-* Row-level comparison using **multiprocessing** for improved performance and to find any mismatches present
+* Row-level comparison using **multiprocessing** for improved performance to find any mismatch
 
 * Validates:
 
@@ -26,7 +24,7 @@
 
 ---
 
-## Module Descriptions
+## 📁 Module Descriptions
 
 ### `main_driver.py`
 
@@ -68,6 +66,34 @@
 * `RowByRowComparator`: Validates data row-wise using the primary key
 * Uses **Python multiprocessing** for faster validation
 * Clearly logs mismatches between source and destination rows
+
+---
+
+### `full_validator.py`
+
+*Full Dataset Validation*
+
+* Validates the entire source and destination dataset
+* Applies:
+
+  * Column validation
+  * Basic property checks (row count, duplicates, data types)
+  * Full row-by-row comparison
+* Used when validating the **entire dataset** without time window constraints
+
+---
+
+### `custom_validator.py`
+
+*Custom Window-Based Validation*
+
+* Filters source and destination data based on a **custom time window** (from YAML config)
+* Applies all validations only within the filtered window:
+
+  * Column validation
+  * Basic checks
+  * Row-by-row comparison
+* Useful when validating **only corrupted or recent slices** of the data
 
 ---
 
