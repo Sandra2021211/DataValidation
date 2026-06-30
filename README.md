@@ -108,7 +108,7 @@ The tests cover:
 * row-by-row comparison mismatch detection
 * unmapped column inference behavior
 
-## What to highlight in interviews
+## Advantages
 
 * architecture: clear separation of responsibilities between file I/O, validation rules, and comparison logic
 * robustness: explicit drift checks for row count, duplicates, and mismatched columns
