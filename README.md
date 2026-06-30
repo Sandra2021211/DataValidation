@@ -1,123 +1,129 @@
 # Data Validation Pipeline
 
-## Features
+A polished data validation portfolio project for healthcare claims comparison.
+It demonstrates dataset mapping, row-level validation, time-window filtering, and automated schema matching.
 
-* Supports **three validation modes**:
+## Why this project
 
-  1. **Full Dataset Validation**
-  2. **Custom (Corrupted Window) Validation**
-  3. **Automated Column Mapping** (No `mapping.json` required)
+This repo is a strong interview asset for data engineering, analytics, or data quality roles because it:
 
-* Smart column matching using:
+* validates dataset integrity through end-to-end comparison
+* supports both mapped and unmapped column workflows
+* includes configuration-driven behavior via JSON and YAML
+* surfaces mismatches clearly with row-by-row diagnostics
 
-  * **Position-based matching**
-  * **Value equality matching**
-  * **Fuzzy string similarity** (via `SequenceMatcher`)
+## Key Features
 
-* Row-level comparison using **multiprocessing** for improved performance to find any mismatch
+* Full dataset validation using explicit column mappings
+* Custom time-window validation for corrupted or recent data slices
+* Automatic column inference when mapping metadata is unavailable
+* Basic dataset checks: row count, duplicate records, empty rows, and data type comparison
+* Row-by-row comparison using multiprocessing for scalability
 
-* Validates:
+## Installation
 
-  * Column mappings
-  * Row counts
-  * Data types
-  * Duplicate entries
-  * Empty rows
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
----
+## Usage
 
-## 📁 Module Descriptions
+Run the interactive pipeline controller:
 
-### `main_driver.py`
+```bash
+python validation/main_driver.py
+```
 
-*Pipeline Controller*
+Then choose one of the modes:
 
-* CLI for selecting validation mode
-* Loads YAML config dynamically
-* Coordinates all steps of validation and comparison
+1. Full Dataset Validation
+2. Custom Dataset Validation
+3. Without Column Mapping
 
----
+### Full Dataset Validation
 
-### `file_read.py`
+Validates the complete source and destination datasets using `src_data/mapping.json`.
 
-*File Reading & Column Validation*
+Example:
 
-* `FileReader`: Reads `.csv`, `.json`, `.yaml` formats
-* Handles file not found, decoding errors
-* `ColumnValidator`: Checks all destination columns have valid mappings
+```bash
+python validation/main_driver.py
+# choose 1
+```
 
----
+### Custom Dataset Validation
 
-### `basic_properties.py`
+Filters the source and destination datasets by stream time using `src_data/requirements.yaml`.
+Use this when you want to validate a specific corrupted time window.
 
-*Basic Dataset Checks*
+Example:
 
-* `BasicPropertiesValidator` handles:
+```bash
+python validation/main_driver.py
+# choose 2
+```
 
-  * Row count mismatch
-  * Data type mismatches
-  * Duplicate rows
-  * Entirely empty rows
+### Without Column Mapping
 
----
+Infers destination columns automatically when mapping metadata is absent.
+This mode is useful when source and destination schema names differ or when a manual mapping file is unavailable.
 
-### `row_by_row_comparison.py`
+Example:
 
-*Row-by-Row Validation*
+```bash
+python validation/main_driver.py
+# choose 3
+```
 
-* `RowByRowComparator`: Validates data row-wise using the primary key
-* Uses **Python multiprocessing** for faster validation
-* Clearly logs mismatches between source and destination rows
+## Project Structure
 
----
+* `validation/`
+  * `main_driver.py` - interactive controller
+  * `mapped_columns/` - mapped-schema validation utilities
+    * `file_read.py` - CSV/JSON/YAML loading and mapping validation
+    * `basic_properties.py` - row count, duplicate, empty row, and type checks
+    * `row_by_row_comparison.py` - primary-key row comparison logic
+    * `full_validator.py` - end-to-end mapped dataset validation
+    * `custom_validator.py` - filtered time-window validation
+  * `unmapped_columns/` - heuristics-driven schema inference
+    * `without_column_mapper.py` - automatic column matching utilities
+* `src_data/` - sample datasets and configuration files
+* `tests/` - unit tests covering validation behavior
 
-### `full_validator.py`
+## Test Suite
 
-*Full Dataset Validation*
+Run the test suite with:
 
-* Validates the entire source and destination dataset
-* Applies:
+```bash
+pytest -q
+```
 
-  * Column validation
-  * Basic property checks (row count, duplicates, data types)
-  * Full row-by-row comparison
-* Used when validating the **entire dataset** without time window constraints
+The tests cover:
 
----
+* file reading for CSV, JSON, and YAML
+* column mapping validation
+* basic dataset property checks
+* row-by-row comparison mismatch detection
+* unmapped column inference behavior
 
-### `custom_validator.py`
+## What to highlight in interviews
 
-*Custom Window-Based Validation*
+* architecture: clear separation of responsibilities between file I/O, validation rules, and comparison logic
+* robustness: explicit drift checks for row count, duplicates, and mismatched columns
+* flexibility: supports configuration and multiple validation workflows
+* practical value: useful for data migration, ETL verification, and data quality monitoring
 
-* Filters source and destination data based on a **custom time window** (from YAML config)
-* Applies all validations only within the filtered window:
+## Dependencies
 
-  * Column validation
-  * Basic checks
-  * Row-by-row comparison
-* Useful when validating **only corrupted or recent slices** of the data
+* `pandas`
+* `PyYAML`
+* `pytest`
 
----
+## Next polish opportunities
 
-### `unmapped_columns/without_column_mapper.py`
-
-*Automated Column Mapping (No Mapping File Required)*
-
-* Matches columns using:
-
-  * `match_by_position()`: Direct index-based comparison
-  * `match_by_value()`: Column-wise value matching
-  * `match_by_word_similarity()`: Fuzzy matching with `SequenceMatcher`
-* Infers and builds column mappings when they’re not explicitly provided
-
----
-
-### `mapped_columns/` & `unmapped_columns/`
-
-*Project Structure Organization*
-
-* Sub-packages that separate logic for:
-
-  * Mapped column validation
-  * Unmapped (automatically detected) column validation
-* `__init__.py` makes them importable Python packages
+* add command-line arguments for file paths and validation modes
+* convert print diagnostics to structured logging
+* add more formal schema validation and type coercion rules
+* include sample reports and failure summaries

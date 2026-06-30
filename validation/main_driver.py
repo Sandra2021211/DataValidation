@@ -1,6 +1,11 @@
-from mapped_columns.full_validator import FullDatasetValidator
-from mapped_columns.custom_validator import CustomDatasetValidator
-from unmapped_columns.without_column_mapper import WithoutColumnMapping
+try:
+    from validation.mapped_columns.full_validator import FullDatasetValidator
+    from validation.mapped_columns.custom_validator import CustomDatasetValidator
+    from validation.unmapped_columns.without_column_mapper import WithoutColumnMapping
+except ImportError:
+    from mapped_columns.full_validator import FullDatasetValidator
+    from mapped_columns.custom_validator import CustomDatasetValidator
+    from unmapped_columns.without_column_mapper import WithoutColumnMapping
 import json 
 import yaml
 import sys

@@ -1,6 +1,6 @@
 import pandas as pd 
-from mapped_columns.file_read import FileReader
-from mapped_columns.row_by_row_comparison import RowByRowComparator 
+from .file_read import FileReader
+from .row_by_row_comparison import RowByRowComparator 
 import sys 
 
 class CustomDatasetValidator:

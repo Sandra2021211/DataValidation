@@ -1,5 +1,5 @@
 import pandas as pd
-from mapped_columns.file_read import FileReader
+from ..mapped_columns.file_read import FileReader
 from difflib import SequenceMatcher
 
 class WithoutColumnMapping:

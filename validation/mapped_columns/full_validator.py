@@ -1,6 +1,6 @@
-from mapped_columns.file_read import FileReader, ColumnValidator
-from mapped_columns.basic_properties import BasicPropertiesValidator
-from mapped_columns.row_by_row_comparison import RowByRowComparator
+from .file_read import FileReader, ColumnValidator
+from .basic_properties import BasicPropertiesValidator
+from .row_by_row_comparison import RowByRowComparator
 import json
 import sys
 import pandas as pd 
